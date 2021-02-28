@@ -41,6 +41,7 @@ sources = [
     'source/dagger/core/graphics/text.cpp',
     'source/dagger/core/graphics/window.cpp',
     'source/dagger/core/input/inputs.cpp',
+    'source/dagger/core/audio_linux.cpp',
     'source/dagger/core/engine.cpp',
     'source/dagger/core/game.cpp',
     'source/dagger/gameplay/common/jiggle.cpp',
