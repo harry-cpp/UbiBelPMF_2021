@@ -220,7 +220,9 @@ void SpriteRenderSystem::OnRender()
 
         const UInt32 renderSize = sizeof(SpriteData) * currentRender.size();
 
-        m_Data = reinterpret_cast<float*>(glMapBufferRange(GL_ARRAY_BUFFER, 0, sizeof(Sprite) * currentRender.size(), GL_MAP_WRITE_BIT));
+        m_Data = reinterpret_cast<float*>(glMapBufferRange(GL_ARRAY_BUFFER, 
+            0, sizeof(Sprite) * currentRender.size(), GL_MAP_WRITE_BIT));
+
         memcpy(m_Data, &(*currentRender.begin()), renderSize);
         glUnmapBuffer(GL_ARRAY_BUFFER);
 
