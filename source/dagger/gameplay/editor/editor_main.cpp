@@ -191,7 +191,7 @@ void EditorToolSystem::OnRenderGUI()
         if (selectedItem - 1 >= m_Targets.size())
         {
             selectedItem = 0;
-            m_Selected.entity = Entity{ -1 };
+            m_Selected.entity = entt::null;
         }
 
         if (selectedItem > 0)

@@ -45,7 +45,7 @@ namespace editor
 
     class EditorToolSystem : public System
     {
-        static inline EditorFocusTarget ms_NoTarget{ Entity{ -1 }, "" };
+        static inline EditorFocusTarget ms_NoTarget{ entt::null, "" };
 
         Bool m_IsInEditor;
         Registry m_Registry;
