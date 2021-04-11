@@ -13,6 +13,7 @@
 #include "core/graphics/textures.h"
 #include "core/graphics/animations.h"
 #include "core/graphics/gui.h"
+#include "gameplay/common/simple_collisions.h"
 #include "tools/diagnostics.h"
 
 #include "core/savegame.h"
@@ -46,6 +47,12 @@ ECommonSaveArchetype EditorTestGame::Save(Entity entity_, JSON::json& saveTo_)
         archetype = archetype | ECommonSaveArchetype::Animator;
     }
 
+    if (registry.has<SimpleCollision>(entity_))
+    {
+        saveTo_["simple_collision"] = SerializeComponent<SimpleCollision>(registry.get<SimpleCollision>(entity_));
+        archetype = archetype | ECommonSaveArchetype::Physics;
+    }
+
     return archetype;
 }
 
@@ -61,6 +68,9 @@ void EditorTestGame::Load(ECommonSaveArchetype archetype_, Entity entity_, JSON:
 
     if (IS_ARCHETYPE_SET(archetype_, ECommonSaveArchetype::Animator))
         DeserializeComponent<Animator>(loadFrom_["animator"], registry.emplace<Animator>(entity_));
+
+    if (IS_ARCHETYPE_SET(archetype_, ECommonSaveArchetype::Physics))
+        DeserializeComponent<SimpleCollision>(loadFrom_["simple_collision"], registry.emplace<SimpleCollision>(entity_));
 }
 
 void EditorTestGame::GameplaySystemsSetup()
@@ -236,10 +246,11 @@ void EditorToolSystem::OnRenderGUI()
                 }
 
                 /* Position values */ {
-                    float pos[]{ compSprite.position.x, compSprite.position.y };
-                    ImGui::InputFloat2("Position", pos, "%f", 1);
+                    float pos[]{ compSprite.position.x, compSprite.position.y, compSprite.position.z };
+                    ImGui::InputFloat3("Position", pos, "%f", 1);
                     compSprite.position.x = pos[0];
                     compSprite.position.y = pos[1];
+                    compSprite.position.z = pos[2];
                 }
 
                 /* Rotation value */ {
@@ -260,11 +271,84 @@ void EditorToolSystem::OnRenderGUI()
                     compSprite.pivot.y = pivot[1];
                 }
             }
+            else if (!reg.has<Sprite>(m_Selected.entity))
+            {
+                if (ImGui::Button("Attach Sprite"))
+                {
+                    reg.emplace<Sprite>(m_Selected.entity);
+                }
+            }
 
             if (reg.has<Animator>(m_Selected.entity) && ImGui::CollapsingHeader("Animator"))
             {
-                ImGui::Text("Animator");
+                Animator& compAnim = reg.get<Animator>(m_Selected.entity);
+                /* Animation */ {
+                    static int selectedAnim = 0;
+                    Sequence<const char*> animations;
+                    int i = 0;
+                    int currentSelected = 0;
+                    for (auto& [k, n] : Engine::Res<Animation>())
+                    {
+                        animations.push_back(k.c_str());
+                        if (k == compAnim.currentAnimation)
+                        {
+                            selectedAnim = i;
+                        }
+                        ++i;
+                    }
+
+                    currentSelected = selectedAnim;
+                    if (ImGui::Combo("Animation", &selectedAnim, animations.data(), animations.size()))
+                    {
+                        if (currentSelected != selectedAnim)
+                        {
+                            AnimatorPlay(compAnim, animations[selectedAnim]);
+                        }
+                    }
+                }
+
+                /* Is playing? */ {
+                    ImGui::Checkbox("Is playing?", &compAnim.animationPlaying);
+                }
             }
+            else if (!reg.has<Animator>(m_Selected.entity))
+            {
+                if (ImGui::Button("Attach Animator"))
+                {
+                    reg.emplace<Animator>(m_Selected.entity);
+                }
+            }
+
+
+            if (reg.has<SimpleCollision>(m_Selected.entity) && ImGui::CollapsingHeader("Collision"))
+            {
+                SimpleCollision& compCol = reg.get<SimpleCollision>(m_Selected.entity);
+
+                /* Pivot values */ {
+                    float pivot[]{ compCol.pivot.x, compCol.pivot.y };
+                    ImGui::DragFloat2("Pivot", pivot, 1, -0.5f, 0.5f, "%f", 1);
+                    compCol.pivot.x = pivot[0];
+                    compCol.pivot.y = pivot[1];
+                }
+
+                /* Size values */ {
+                    float size[]{ compCol.size.x, compCol.size.y };
+                    ImGui::DragFloat2("Pivot", size, 1, -0.5f, 0.5f, "%f", 1);
+                    compCol.size.x = size[0];
+                    compCol.size.y = size[1];
+                }
+            }
+            else if (!reg.has<SimpleCollision>(m_Selected.entity))
+            {
+                if (ImGui::Button("Attach Collision"))
+                {
+                    reg.emplace<SimpleCollision>(m_Selected.entity);
+                }
+            }
+
+            // to add more components, replicate the above if statements carefully
+            // if you're lost, ping Mika on discord :)
+            // ps. DON'T forget to make your components serializable by replicating some more code in savegame.h
         }
 
         ImGui::End();

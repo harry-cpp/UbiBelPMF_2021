@@ -133,3 +133,18 @@ void DeserializeComponent(JSON::json input_, Animator& fill_)
     AnimatorPlay(fill_, input_["name"]);
 }
 
+template<>
+JSON::json SerializeComponent(SimpleCollision& collision_)
+{
+    JSON::json save{};
+    save["size"] = SerializeComponent(collision_.size);
+    save["pivot"] = SerializeComponent(collision_.pivot);
+    return save;
+}
+
+template<>
+void DeserializeComponent(JSON::json input_, SimpleCollision& fill_)
+{
+    DeserializeComponent(input_["size"], fill_.size);
+    DeserializeComponent(input_["pivot"], fill_.pivot);
+}

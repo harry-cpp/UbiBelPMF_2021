@@ -18,6 +18,7 @@ namespace editor
         Sprite      = 0b00000001,
         Transform   = 0b00000010,
         Animator    = 0b00000100,
+        Physics     = 0b00001000,
     };
 
     #define IS_ARCHETYPE_SET(in, test) ((in & test) == test)
