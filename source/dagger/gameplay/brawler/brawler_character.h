@@ -65,7 +65,6 @@ namespace brawler
                 chr.input.contexts.push_back(input_);
 
             chr.character.speed = 50;
-
             return chr;
         }
     };

@@ -54,6 +54,16 @@ void BrawlerCharacterFSM::Running::Run(BrawlerCharacterFSM::StateComponent& stat
 
 	Float32 run = input.Get("run");
 
+	if (input.Get("run") > 0.5)
+	{
+		movable.envSpeed = { 1000, 0 };
+	}
+	if (input.Get("run") < -0.5)
+	{
+		movable.envSpeed = { -1000, 0 };
+	}
+		
+
 	if (!movable.isOnGround || EPSILON_NOT_ZERO(input.Get("jump")))
 	{
 		Logger::info(movable.isOnGround);
@@ -87,6 +97,7 @@ DEFAULT_EXIT(BrawlerCharacterFSM, Jumping);
 
 void BrawlerCharacterFSM::Jumping::Run(BrawlerCharacterFSM::StateComponent& state_)
 {
+
 	auto&& [sprite, input, player, transform, movable] = Engine::Registry().get<Sprite, InputReceiver, Player, Transform, Movable>(state_.entity);
 
 	Float32 run = input.Get("run");
@@ -116,7 +127,7 @@ void BrawlerCharacterFSM::Jumping::Run(BrawlerCharacterFSM::StateComponent& stat
 		// sprite.position.y += 50 * Engine::DeltaTime();
 		if(EPSILON_NOT_ZERO(input.Get("jump")))
 		{
-			movable.speed.y += 50;
+			movable.speed.y += 100;
 		}
 		if (EPSILON_NOT_ZERO(run))
 		{

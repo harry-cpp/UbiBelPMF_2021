@@ -17,26 +17,29 @@ void PhysicsSystem::Run()
 		auto& m = objects.get<Movable>(obj);
 		auto& s = objects.get<Sprite>(obj);
 
-		t.position.x += m.speed.x * Engine::DeltaTime();
-		t.position.y += (m.speed.y - 20.0f) * Engine::DeltaTime();
-		
+
+		t.position.x += (m.speed.x + m.envSpeed.x) * Engine::DeltaTime();
+		t.position.y += (m.speed.y - 20.0f - m.fallSpeed) * Engine::DeltaTime();
 
 		if (t.position.y < 0)
 		{
 			t.position.y = 0;
 			m.isOnGround = true;
+			m.envSpeed.y = 0;
+			m.fallSpeed = 0;
 		}
 		else
 		{
+			m.fallSpeed += 0.1;
 			m.isOnGround = false;
 		}
-
-		s.position = t.position;
 
 		m.prevPosition = t.position;
 		m.prevSpeed = m.speed;
 		m.wasOnGround = m.isOnGround;
 		m.speed.x = 0;
 		m.speed.y = 0;
+		
+		m.envSpeed *= 0.95;	
 	}
 }

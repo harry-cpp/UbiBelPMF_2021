@@ -98,7 +98,6 @@ void Brawler::CreateBackdrop()
 
 void Brawler::WorldSetup(Engine& engine_)
 {
-    Engine::GetDefaultResource<Audio>()->PlayLoop("music");
 
     SetCamera();
     // CreateBackdrop();
