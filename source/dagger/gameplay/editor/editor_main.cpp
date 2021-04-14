@@ -19,6 +19,7 @@
 #include "core/savegame.h"
 #include "gameplay/editor/savegame_system.h"
 #include <iostream>
+#include <cstring>
 
 using namespace dagger;
 using namespace editor;
@@ -127,6 +128,7 @@ void EditorToolSystem::Run()
     if (m_IsInEditor)
     {
         auto& knob = m_Registry.get<Sprite>(m_Focus);
+        knob.color.a = 1;
         auto& focus = m_Registry.get<EditorFocus>(m_Focus);
 
         if (Input::IsInputDown(EDaggerMouse::MouseButton3))
@@ -167,6 +169,11 @@ void EditorToolSystem::Run()
                     });
         }
     }
+    else
+    {
+        auto& knob = m_Registry.get<Sprite>(m_Focus);
+        knob.color.a = 0;
+    }
 }
 
 void EditorToolSystem::OnRenderGUI()
@@ -176,6 +183,8 @@ void EditorToolSystem::OnRenderGUI()
         auto& reg = Engine::Registry();
 
         static int selectedItem = 0;
+        static String filter;
+
         Sequence<const char*> items;
 
         items.push_back("<none>");
@@ -211,6 +220,8 @@ void EditorToolSystem::OnRenderGUI()
             
             if (reg.has<Sprite>(m_Selected.entity) && ImGui::CollapsingHeader("Sprite"))
             {
+                ImGui::InputText("Filter", filter.data(), 80);
+
                 Sprite& compSprite = reg.get<Sprite>(m_Selected.entity);
 
                 /* Sprite texture */ {
@@ -220,7 +231,9 @@ void EditorToolSystem::OnRenderGUI()
                     int currentSelected = 0;
                     for (auto& [k, n] : Engine::Res<Texture>())
                     {
-                        textures.push_back(k.c_str());
+                        if (strstr(k.data(), filter.data()) != nullptr)
+                            textures.push_back(k.c_str());
+
                         if (k == compSprite.image->Name())
                         {
                             selectedTexture = i;
@@ -229,7 +242,10 @@ void EditorToolSystem::OnRenderGUI()
                     }
 
                     currentSelected = selectedTexture;
-                    if (ImGui::Combo("Image", &selectedTexture, textures.data(), textures.size()))
+                    String title{};
+                    title.reserve(100);
+                    sprintf(title.data(), "Image (%d)", textures.size());
+                    if (ImGui::Combo(title.data(), &selectedTexture, textures.data(), textures.size()))
                     {
                         if (currentSelected != selectedTexture)
                         {
