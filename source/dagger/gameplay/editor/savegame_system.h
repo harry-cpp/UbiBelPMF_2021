@@ -6,9 +6,6 @@ template<typename Archetype>
 struct SaveGame
 {
 	Archetype archetype;
-    UInt32 id;
-
-    static inline UInt32 ID = 0;
 };
 
 template<typename Archetype>

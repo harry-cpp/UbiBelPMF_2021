@@ -218,6 +218,12 @@ void EditorToolSystem::OnRenderGUI()
             const int index = selectedItem - 1;
             m_Selected = m_Targets[index];
             
+            if (!reg.valid(m_Selected.entity))
+            {
+                ImGui::End();
+                return;
+            }
+
             if (reg.has<Sprite>(m_Selected.entity) && ImGui::CollapsingHeader("Sprite"))
             {
                 ImGui::InputText("Filter", filter.data(), 80);
