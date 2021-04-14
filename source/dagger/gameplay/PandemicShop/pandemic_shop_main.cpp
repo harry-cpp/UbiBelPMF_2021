@@ -182,7 +182,10 @@ void pandemic_shop::SetupWorld(Engine& engine_)
     
     // player controller setup
     const Float32 playerSize = tileSize;
-    PandemicShopPlayerInputSystem::SetupPlayerBoarders((height - 2)* (tileSize + Space) / 2.f , -(height - 2)* (tileSize + Space) / 2.f);
+    PandemicShopPlayerInputSystem::SetupPlayerBoarders((height - 2)* (tileSize + Space) / 2.f , 
+                                                        -(height - 2)* (tileSize + Space) / 2.f, 
+                                                        (width - 2)* (tileSize + Space) / 2.f,
+                                                        -(width - 2)* (tileSize + Space) / 2.f);
     PandemicShopPlayerInputSystem::s_PlayerSpeed = tileSize * 14.f;
     //1st player
     {

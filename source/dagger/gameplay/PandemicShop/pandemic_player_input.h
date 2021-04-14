@@ -11,8 +11,10 @@ namespace pandemic_shop
     {
         EDaggerKeyboard up_key;
         EDaggerKeyboard down_key;
-
-        Vector2 input{ 0, 0 };
+        EDaggerKeyboard right_key;
+        EDaggerKeyboard left_key;
+        
+        Vector2 input{ 0, 0};
     };
 
     class PandemicShopPlayerInputSystem
@@ -20,6 +22,8 @@ namespace pandemic_shop
     {
         static Float32 s_BoarderUp;
         static Float32 s_BoarderDown;
+        static Float32 s_BoarderRight;
+        static Float32 s_BoarderLeft;
 
     public:
 
@@ -36,12 +40,17 @@ namespace pandemic_shop
         {
             controllerMapping_.up_key = EDaggerKeyboard::KeyW;
             controllerMapping_.down_key = EDaggerKeyboard::KeyS;
+            controllerMapping_.right_key = EDaggerKeyboard::KeyD;
+            controllerMapping_.left_key = EDaggerKeyboard::KeyA;
         }
 
-        static void SetupPlayerBoarders(Float32 boarderUp_, Float32 boarderDown_)
+        static void SetupPlayerBoarders(Float32 boarderUp_, Float32 boarderDown_,
+                                        Float32 boarderRight_, Float32 boarderLeft_)
         {
             s_BoarderUp = boarderUp_;
             s_BoarderDown = boarderDown_;
+            s_BoarderRight = boarderRight_;
+            s_BoarderLeft = boarderLeft_;
         }
 
     private:

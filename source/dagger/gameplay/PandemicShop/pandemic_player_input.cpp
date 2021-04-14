@@ -8,6 +8,8 @@ using namespace pandemic_shop;
 
 Float32 PandemicShopPlayerInputSystem::s_BoarderDown = -20;
 Float32 PandemicShopPlayerInputSystem::s_BoarderUp = 20;
+Float32 PandemicShopPlayerInputSystem::s_BoarderRight = 20;
+Float32 PandemicShopPlayerInputSystem::s_BoarderLeft = -20;
 
 Float32 PandemicShopPlayerInputSystem::s_PlayerSpeed = 1.f;
 
@@ -41,6 +43,23 @@ void PandemicShopPlayerInputSystem::OnKeyboardEvent(KeyboardEvent kEvent_)
         {
             ctrl_.input.y = 0;
         }
+
+        if (kEvent_.key == ctrl_.right_key && (kEvent_.action == EDaggerInputState::Pressed || kEvent_.action == EDaggerInputState::Held))
+        {
+            ctrl_.input.x = 1;
+        }
+        else if (kEvent_.key == ctrl_.right_key && kEvent_.action == EDaggerInputState::Released && ctrl_.input.y > 0)
+        {
+            ctrl_.input.x = 0;
+        }
+        else if (kEvent_.key == ctrl_.left_key && (kEvent_.action == EDaggerInputState::Held || kEvent_.action == EDaggerInputState::Pressed))
+        {
+            ctrl_.input.x = -1;
+        }
+        else if (kEvent_.key == ctrl_.left_key && kEvent_.action == EDaggerInputState::Released && ctrl_.input.y < 0)
+        {
+            ctrl_.input.x = 0;
+        }
     });
 }
 
@@ -53,6 +72,7 @@ void PandemicShopPlayerInputSystem::Run()
         auto &ctrl = view.get<ControllerMapping>(entity);
 
         t.position.y += ctrl.input.y * s_PlayerSpeed * Engine::DeltaTime();
+        t.position.x += ctrl.input.x * s_PlayerSpeed * Engine::DeltaTime();
 
         if (t.position.y > s_BoarderUp)
         {
@@ -62,6 +82,16 @@ void PandemicShopPlayerInputSystem::Run()
         if (t.position.y < s_BoarderDown)
         {
             t.position.y = s_BoarderDown;
+        }
+
+        if (t.position.x > s_BoarderRight)
+        {
+            t.position.x = s_BoarderRight;
+        }
+
+        if (t.position.x < s_BoarderLeft)
+        {
+            t.position.x = s_BoarderLeft;
         }
     }
 }
