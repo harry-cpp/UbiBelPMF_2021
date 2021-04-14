@@ -17,7 +17,7 @@
 #include "gameplay/common/simple_collisions.h"
 #include "gameplay/ping_pong/pingpong_ball.h"
 #include "gameplay/ping_pong/player_scores.h"
-#include "gameplay/ping_pong/pingpong_playerinput.h"
+#include "gameplay/PandemicShop/pandemic_player_input.h"
 #include "gameplay/ping_pong/pingpong_tools.h"
 
 
@@ -44,6 +44,7 @@ void PandemicShopGame::CoreSystemsSetup(Engine& engine_)
 void PandemicShopGame::GameplaySystemsSetup(Engine& engine_)
 {
     engine_.AddPausableSystem<SimpleCollisionsSystem>();
+    engine_.AddPausableSystem<PandemicShopPlayerInputSystem>();
 #if defined(DAGGER_DEBUG)
     engine_.AddPausableSystem<PingPongTools>();
 #endif //defined(DAGGER_DEBUG)
@@ -180,50 +181,32 @@ void pandemic_shop::SetupWorld(Engine& engine_)
 
     
     // player controller setup
-    // const Float32 playerSize = tileSize * ((height - 2) * (1 + Space) * 0.33f);
-    // PingPongPlayerInputSystem::SetupPlayerBoarders(playerSize, -playerSize);
-    // PingPongPlayerInputSystem::s_PlayerSpeed = tileSize * 14.f;
-    // //1st player
-    // {
-    //     auto entity = reg.create();
-    //     auto& col = reg.emplace<SimpleCollision>(entity);
-    //     col.size.x = tileSize;
-    //     col.size.y = playerSize;
+    const Float32 playerSize = tileSize;
+    PandemicShopPlayerInputSystem::SetupPlayerBoarders((height - 2)* (tileSize + Space) / 2.f , -(height - 2)* (tileSize + Space) / 2.f);
+    PandemicShopPlayerInputSystem::s_PlayerSpeed = tileSize * 14.f;
+    //1st player
+    {
+        auto entity = reg.create();
+        auto& col = reg.emplace<SimpleCollision>(entity);
+        col.size.x = playerSize;
+        col.size.y = playerSize;
 
-    //     auto& transform = reg.emplace<Transform>(entity);
-    //     transform.position.x = (2.5f - static_cast<float>(width * (1 + Space)) / 2.f) * tileSize;
-    //     transform.position.y = 0;
-    //     transform.position.z = zPos;
+        auto& transform = reg.emplace<Transform>(entity);
+        transform.position.x = (2.5f - static_cast<float>(height * (1 + Space)) / 2.f) * tileSize;
+        transform.position.y = 0;
+        transform.position.z = zPos;
 
-    //     auto& sprite = reg.emplace<Sprite>(entity);
-    //     AssignSprite(sprite, "EmptyWhitePixel");
-    //     sprite.size.x = tileSize;
-    //     sprite.size.y = playerSize;
+        auto& sprite = reg.emplace<Sprite>(entity);
+        AssignSprite(sprite, "EmptyWhitePixel");
+        sprite.size.x = playerSize;
+        sprite.size.y = playerSize;
+        sprite.color.r = 1.0f;
+        sprite.color.g = 0.0f;
+        sprite.color.b = 0.0f;
 
-    //     auto& controller = reg.emplace<ControllerMapping>(entity);
-    //     PingPongPlayerInputSystem::SetupPlayerOneInput(controller);
-    // }
-
-    // //2nd player
-    // {
-    //     auto entity = reg.create();
-    //     auto& col = reg.emplace<SimpleCollision>(entity);
-    //     col.size.x = tileSize;
-    //     col.size.y = playerSize;
-
-    //     auto& transform = reg.emplace<Transform>(entity);
-    //     transform.position.x = (0.5f + (width - 3) + (width - 1) * Space - static_cast<float>(width * (1 + Space)) / 2.f) * tileSize;
-    //     transform.position.y = 0;
-    //     transform.position.z = zPos;
-
-    //     auto& sprite = reg.emplace<Sprite>(entity);
-    //     AssignSprite(sprite, "EmptyWhitePixel");
-    //     sprite.size.x = tileSize;
-    //     sprite.size.y = playerSize;
-
-    //     auto& controller = reg.emplace<ControllerMapping>(entity);
-    //     PingPongPlayerInputSystem::SetupPlayerTwoInput(controller);
-    // }
+        auto& controller = reg.emplace<ControllerMapping>(entity);
+        PandemicShopPlayerInputSystem::SetupPlayerInput(controller);
+    }
 
     // // add score system to count scores for left and right collisions
     // PlayerScoresSystem::SetFieldSize(width, height, tileSize * (1 + Space));
