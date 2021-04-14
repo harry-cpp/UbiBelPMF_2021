@@ -103,13 +103,13 @@ void EditorToolSystem::OnToolMenuRender()
         if (ImGui::MenuItem("Save"))
         {
             Engine::Dispatcher().trigger<SaveGameSystem<ECommonSaveArchetype>::SaveRequest>(
-                SaveGameSystem<ECommonSaveArchetype>::SaveRequest{ "editor_test_save.json" });
+                SaveGameSystem<ECommonSaveArchetype>::SaveRequest{ m_Filename });
         }
 
         if (ImGui::MenuItem("Load"))
         {
             Engine::Dispatcher().trigger<SaveGameSystem<ECommonSaveArchetype>::LoadRequest>(
-                SaveGameSystem<ECommonSaveArchetype>::LoadRequest{ "editor_test_save.json" });
+                SaveGameSystem<ECommonSaveArchetype>::LoadRequest{ m_Filename });
         }
 
         ImGui::EndMenu();
@@ -193,7 +193,10 @@ void EditorToolSystem::OnRenderGUI()
             items.push_back(item.name.c_str());
         }
 
-        ImGui::Begin("Entities");
+        ImGui::Begin("Scene Editor");
+
+        ImGui::InputText("Filename", m_Filename.data(), m_Filename.length());
+        ImGui::Separator();
 
         if (ImGui::Button("Create entity"))
         {

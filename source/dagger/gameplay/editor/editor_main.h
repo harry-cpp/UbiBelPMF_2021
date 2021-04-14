@@ -52,13 +52,14 @@ namespace editor
         Registry m_Registry;
         Entity m_Focus;
         EditorFocusTarget m_Selected{ ms_NoTarget };
-
+        String m_Filename;
         Sequence<EditorFocusTarget> m_Targets;
 
         String SystemName() override { return "SaveGame"; }
 
         void SpinUp() override
         {
+            m_Filename = "default_saved_scene.json";
             Engine::Dispatcher().sink<KeyboardEvent>().connect<&EditorToolSystem::OnKeyboardEvent>(this);
             Engine::Dispatcher().sink<ToolMenuRender>().connect<&EditorToolSystem::OnToolMenuRender>(this);
             Engine::Dispatcher().sink<GUIRender>().connect<&EditorToolSystem::OnRenderGUI>(this);
