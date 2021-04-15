@@ -1,0 +1,12 @@
+grass_top_left_corner 0 0 512 512
+grass_top_mid 512 0 512 512
+grass_top_right_corner 1024 0 512 512
+
+grass_left_mid 0 512 512 512
+gras_mid_black 512 512 512 512
+gras_right_mid 1024 512 512 512
+
+grass_bottom_left 0 1024 512 512
+grass_bottom_mid 512 1024 512 512
+grass_bottom_right 1024 1536 512 512
+
