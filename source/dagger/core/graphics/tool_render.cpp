@@ -71,6 +71,11 @@ void ToolRenderSystem::OnRender()
 {
     static auto SortSprites = [](const Sprite& a_, const Sprite& b_)
     {
+        // sorting by levels: z-order, shader, then image
+        // if the values are equal on z-order level, we go to the next (shader)
+        // if the shaders are also equal, we go to the texture
+        // if the textures are also equal, we give up
+
         UInt32 aShader = a_.shader->programId;
         UInt32 bShader = b_.shader->programId;
         UInt32 aZ = a_.position.z;
@@ -100,7 +105,6 @@ void ToolRenderSystem::OnRender()
 
     if (registry != nullptr)
     {
-
         const auto& view = registry->view<Sprite>();
         Sequence<Sprite> sprites{ view.raw(), view.raw() + view.size() };
         std::sort(sprites.begin(), sprites.end(), SortSprites);

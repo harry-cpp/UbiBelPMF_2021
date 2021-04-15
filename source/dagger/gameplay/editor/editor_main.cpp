@@ -180,6 +180,213 @@ void EditorToolSystem::Run()
     }
 }
 
+void EditorToolSystem::GUIExecuteCreateEntity()
+{
+    auto& reg = Engine::Registry();
+    auto newEntity = reg.create();
+    auto& newSprite = reg.emplace<Sprite>(newEntity);
+    AssignSprite(newSprite, "tools:knob2");
+    auto& newSavegame = reg.emplace<SaveGame<ECommonSaveArchetype>>(newEntity);
+}
+
+void EditorToolSystem::GUIDrawSpriteEditor()
+{
+    static String filter;
+
+    auto& reg = Engine::Registry();
+
+    if (reg.has<Sprite>(m_Selected.entity) && ImGui::CollapsingHeader("Sprite"))
+    {
+        ImGui::InputText("Filter", filter.data(), 80);
+
+        Sprite& compSprite = reg.get<Sprite>(m_Selected.entity);
+
+        /* Sprite texture */ {
+            static int selectedTexture = 0;
+            Sequence<const char*> textures;
+            int i = 0;
+            int currentSelected = 0;
+            for (auto& [k, n] : Engine::Res<Texture>())
+            {
+                if (strstr(k.data(), filter.data()) != nullptr)
+                    textures.push_back(k.c_str());
+
+                if (k == compSprite.image->Name())
+                {
+                    selectedTexture = i;
+                }
+                ++i;
+            }
+
+            currentSelected = selectedTexture;
+            String title{};
+            title.reserve(100);
+            sprintf(title.data(), "Image (%d)", textures.size());
+            if (ImGui::Combo(title.data(), &selectedTexture, textures.data(), textures.size()))
+            {
+                if (currentSelected != selectedTexture)
+                {
+                    AssignSprite(compSprite, textures[selectedTexture]);
+                }
+            }
+        }
+
+        /* Size values */ {
+            float size[]{ compSprite.size.x, compSprite.size.y };
+            ImGui::SliderFloat2("Pixel Size", size, -10000.0f, 10000.0f, "%f", 1);
+            compSprite.size.x = size[0];
+            compSprite.size.y = size[1];
+        }
+
+        /* Position values */ {
+            float pos[]{ compSprite.position.x, compSprite.position.y, compSprite.position.z };
+            ImGui::InputFloat3("Position", pos, "%f", 1);
+            compSprite.position.x = pos[0];
+            compSprite.position.y = pos[1];
+            compSprite.position.z = pos[2];
+        }
+
+        /* Rotation value */ {
+            ImGui::SliderFloat("Rotation", &compSprite.rotation, 0, 360, "%f", 1);
+        }
+
+        /* Scale values */ {
+            float size[]{ compSprite.scale.x, compSprite.scale.y };
+            ImGui::DragFloat2("Scale", size, 1, -10, 10, "%f", 1);
+            compSprite.scale.x = size[0];
+            compSprite.scale.y = size[1];
+        }
+
+        /* Pivot values */ {
+            float pivot[]{ compSprite.pivot.x, compSprite.pivot.y };
+            ImGui::DragFloat2("Pivot", pivot, 1, -0.5f, 0.5f, "%f", 1);
+            compSprite.pivot.x = pivot[0];
+            compSprite.pivot.y = pivot[1];
+        }
+    }
+    else if (!reg.has<Sprite>(m_Selected.entity))
+    {
+        if (ImGui::Button("Attach Sprite"))
+        {
+            reg.emplace<Sprite>(m_Selected.entity);
+        }
+    }
+}
+
+void EditorToolSystem::GUIDrawAnimationEditor()
+{
+    auto& reg = Engine::Registry();
+
+    if (reg.has<Animator>(m_Selected.entity) && ImGui::CollapsingHeader("Animator"))
+    {
+        Animator& compAnim = reg.get<Animator>(m_Selected.entity);
+        /* Animation */ {
+            static int selectedAnim = 0;
+            Sequence<const char*> animations;
+            int i = 0;
+            int currentSelected = 0;
+            for (auto& [k, n] : Engine::Res<Animation>())
+            {
+                animations.push_back(k.c_str());
+                if (k == compAnim.currentAnimation)
+                {
+                    selectedAnim = i;
+                }
+                ++i;
+            }
+
+            currentSelected = selectedAnim;
+            if (ImGui::Combo("Animation", &selectedAnim, animations.data(), animations.size()))
+            {
+                if (currentSelected != selectedAnim)
+                {
+                    AnimatorPlay(compAnim, animations[selectedAnim]);
+                }
+            }
+        }
+
+        /* Is playing? */ {
+            ImGui::Checkbox("Is playing?", &compAnim.animationPlaying);
+        }
+    }
+    else if (!reg.has<Animator>(m_Selected.entity))
+    {
+        if (ImGui::Button("Attach Animator"))
+        {
+            reg.emplace<Animator>(m_Selected.entity);
+        }
+    }
+}
+
+void EditorToolSystem::GUIDrawPhysicsEditor()
+{
+    auto& reg = Engine::Registry();
+
+    if (reg.has<SimpleCollision>(m_Selected.entity) && ImGui::CollapsingHeader("Collision"))
+    {
+        SimpleCollision& compCol = reg.get<SimpleCollision>(m_Selected.entity);
+
+        /* Pivot values */ {
+            float pivot[]{ compCol.pivot.x, compCol.pivot.y };
+            ImGui::DragFloat2("Pivot", pivot, 1, -0.5f, 0.5f, "%f", 1);
+            compCol.pivot.x = pivot[0];
+            compCol.pivot.y = pivot[1];
+        }
+
+        /* Size values */ {
+            float size[]{ compCol.size.x, compCol.size.y };
+            ImGui::DragFloat2("Size", size, 1, -0.5f, 0.5f, "%f", 1);
+            compCol.size.x = size[0];
+            compCol.size.y = size[1];
+        }
+    }
+    else if (!reg.has<SimpleCollision>(m_Selected.entity))
+    {
+        if (ImGui::Button("Attach Collision"))
+        {
+            reg.emplace<SimpleCollision>(m_Selected.entity);
+        }
+    }
+}
+
+bool EditorToolSystem::GUIDrawEntityFocusSelection(int& selectedItem)
+{
+    auto& reg = Engine::Registry();
+
+    Sequence<const char*> items;
+
+    items.push_back("<none>");
+    for (auto& item : m_Targets)
+    {
+        items.push_back(item.name.c_str());
+    }
+
+    ImGui::ListBox("In Focus", &selectedItem, items.data(), items.size(), 10);
+
+    if (selectedItem - 1 >= m_Targets.size())
+    {
+        selectedItem = 0;
+        m_Selected.entity = entt::null;
+    }
+
+    if (selectedItem > 0)
+    {
+        const int index = selectedItem - 1;
+        m_Selected = m_Targets[index];
+
+        if (!reg.valid(m_Selected.entity))
+        {
+            ImGui::End();
+            return false;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
 void EditorToolSystem::OnRenderGUI()
 {
     if (m_IsInEditor)
@@ -187,15 +394,6 @@ void EditorToolSystem::OnRenderGUI()
         auto& reg = Engine::Registry();
 
         static int selectedItem = 0;
-        static String filter;
-
-        Sequence<const char*> items;
-
-        items.push_back("<none>");
-        for (auto& item : m_Targets)
-        {
-            items.push_back(item.name.c_str());
-        }
 
         ImGui::Begin("Scene Editor");
 
@@ -204,180 +402,21 @@ void EditorToolSystem::OnRenderGUI()
 
         if (ImGui::Button("Create entity"))
         {
-            auto newEntity = reg.create();
-            auto& newSprite = reg.emplace<Sprite>(newEntity);
-            AssignSprite(newSprite, "tools:knob2");
-            auto& newSavegame = reg.emplace<SaveGame<ECommonSaveArchetype>>(newEntity);
-            auto& focus = m_Registry.get<EditorFocus>(m_Focus);
-            focus.dirty = true;
+            GUIExecuteCreateEntity();
+            m_Registry.get<EditorFocus>(m_Focus).dirty = true;
         }
 
-        ImGui::ListBox("In Focus", &selectedItem, items.data(), items.size(), 10);
-
-        if (selectedItem - 1 >= m_Targets.size())
+        if (GUIDrawEntityFocusSelection(selectedItem))
         {
-            selectedItem = 0;
-            m_Selected.entity = entt::null;
-        }
+            GUIDrawSpriteEditor();
+            GUIDrawAnimationEditor();
+            GUIDrawPhysicsEditor();
 
-        if (selectedItem > 0)
-        {
-            const int index = selectedItem - 1;
-            m_Selected = m_Targets[index];
-            
-            if (!reg.valid(m_Selected.entity))
-            {
-                ImGui::End();
-                return;
-            }
-
-            if (reg.has<Sprite>(m_Selected.entity) && ImGui::CollapsingHeader("Sprite"))
-            {
-                ImGui::InputText("Filter", filter.data(), 80);
-
-                Sprite& compSprite = reg.get<Sprite>(m_Selected.entity);
-
-                /* Sprite texture */ {
-                    static int selectedTexture = 0;
-                    Sequence<const char*> textures;
-                    int i = 0;
-                    int currentSelected = 0;
-                    for (auto& [k, n] : Engine::Res<Texture>())
-                    {
-                        if (strstr(k.data(), filter.data()) != nullptr)
-                            textures.push_back(k.c_str());
-
-                        if (k == compSprite.image->Name())
-                        {
-                            selectedTexture = i;
-                        }
-                        ++i;
-                    }
-
-                    currentSelected = selectedTexture;
-                    String title{};
-                    title.reserve(100);
-                    sprintf(title.data(), "Image (%d)", textures.size());
-                    if (ImGui::Combo(title.data(), &selectedTexture, textures.data(), textures.size()))
-                    {
-                        if (currentSelected != selectedTexture)
-                        {
-                            AssignSprite(compSprite, textures[selectedTexture]);
-                        }
-                    }
-                }
-
-                /* Size values */ {
-                    float size[]{ compSprite.size.x, compSprite.size.y };
-                    ImGui::SliderFloat2("Pixel Size", size, -10000.0f, 10000.0f, "%f", 1);
-                    compSprite.size.x = size[0];
-                    compSprite.size.y = size[1];
-                }
-
-                /* Position values */ {
-                    float pos[]{ compSprite.position.x, compSprite.position.y, compSprite.position.z };
-                    ImGui::InputFloat3("Position", pos, "%f", 1);
-                    compSprite.position.x = pos[0];
-                    compSprite.position.y = pos[1];
-                    compSprite.position.z = pos[2];
-                }
-
-                /* Rotation value */ {
-                    ImGui::SliderFloat("Rotation", &compSprite.rotation, 0, 360, "%f", 1);
-                }
-
-                /* Scale values */ {
-                    float size[]{ compSprite.scale.x, compSprite.scale.y };
-                    ImGui::DragFloat2("Scale", size, 1, -10, 10, "%f", 1);
-                    compSprite.scale.x = size[0];
-                    compSprite.scale.y = size[1];
-                }
-
-                /* Pivot values */ {
-                    float pivot[]{ compSprite.pivot.x, compSprite.pivot.y };
-                    ImGui::DragFloat2("Pivot", pivot, 1, -0.5f, 0.5f, "%f", 1);
-                    compSprite.pivot.x = pivot[0];
-                    compSprite.pivot.y = pivot[1];
-                }
-            }
-            else if (!reg.has<Sprite>(m_Selected.entity))
-            {
-                if (ImGui::Button("Attach Sprite"))
-                {
-                    reg.emplace<Sprite>(m_Selected.entity);
-                }
-            }
-
-            if (reg.has<Animator>(m_Selected.entity) && ImGui::CollapsingHeader("Animator"))
-            {
-                Animator& compAnim = reg.get<Animator>(m_Selected.entity);
-                /* Animation */ {
-                    static int selectedAnim = 0;
-                    Sequence<const char*> animations;
-                    int i = 0;
-                    int currentSelected = 0;
-                    for (auto& [k, n] : Engine::Res<Animation>())
-                    {
-                        animations.push_back(k.c_str());
-                        if (k == compAnim.currentAnimation)
-                        {
-                            selectedAnim = i;
-                        }
-                        ++i;
-                    }
-
-                    currentSelected = selectedAnim;
-                    if (ImGui::Combo("Animation", &selectedAnim, animations.data(), animations.size()))
-                    {
-                        if (currentSelected != selectedAnim)
-                        {
-                            AnimatorPlay(compAnim, animations[selectedAnim]);
-                        }
-                    }
-                }
-
-                /* Is playing? */ {
-                    ImGui::Checkbox("Is playing?", &compAnim.animationPlaying);
-                }
-            }
-            else if (!reg.has<Animator>(m_Selected.entity))
-            {
-                if (ImGui::Button("Attach Animator"))
-                {
-                    reg.emplace<Animator>(m_Selected.entity);
-                }
-            }
-
-
-            if (reg.has<SimpleCollision>(m_Selected.entity) && ImGui::CollapsingHeader("Collision"))
-            {
-                SimpleCollision& compCol = reg.get<SimpleCollision>(m_Selected.entity);
-
-                /* Pivot values */ {
-                    float pivot[]{ compCol.pivot.x, compCol.pivot.y };
-                    ImGui::DragFloat2("Pivot", pivot, 1, -0.5f, 0.5f, "%f", 1);
-                    compCol.pivot.x = pivot[0];
-                    compCol.pivot.y = pivot[1];
-                }
-
-                /* Size values */ {
-                    float size[]{ compCol.size.x, compCol.size.y };
-                    ImGui::DragFloat2("Pivot", size, 1, -0.5f, 0.5f, "%f", 1);
-                    compCol.size.x = size[0];
-                    compCol.size.y = size[1];
-                }
-            }
-            else if (!reg.has<SimpleCollision>(m_Selected.entity))
-            {
-                if (ImGui::Button("Attach Collision"))
-                {
-                    reg.emplace<SimpleCollision>(m_Selected.entity);
-                }
-            }
-
-            // to add more components, replicate the above if statements carefully
+            // to add more components, replicate the above functions carefully
             // if you're lost, ping Mika on discord :)
-            // ps. DON'T forget to make your components serializable by replicating some more code in savegame.h
+            // ps. DON'T forget to make your components serializable by replicating the following:
+            //  - de/serialiazation in savegame.h
+            //  - changing the savegame enum and editor GUI in editor_main.h/cpp
         }
 
         ImGui::End();

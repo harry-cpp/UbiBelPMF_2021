@@ -88,6 +88,13 @@ namespace editor
         void OnKeyboardEvent(KeyboardEvent event_);
         void OnToolMenuRender();
         void OnRenderGUI();
+
+        void GUIExecuteCreateEntity();
+        void GUIDrawSpriteEditor();
+        void GUIDrawAnimationEditor();
+        void GUIDrawPhysicsEditor();
+        bool GUIDrawEntityFocusSelection(int& selectedItem);
+
     };
 
     class EditorTestGame : public Game, public SaveLoadProcess<ECommonSaveArchetype>
