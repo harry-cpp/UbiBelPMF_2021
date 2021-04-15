@@ -6,6 +6,8 @@ deps = [
 ]
 
 if (host_machine.system() == 'linux')
+    add_global_link_arguments([ '-lstdc++fs' ], language: 'cpp')
+
     deps += [
         dependency('tbb'),
         meson.get_compiler('c').find_library('dl')
