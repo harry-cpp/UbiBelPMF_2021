@@ -1,21 +1,27 @@
 #pragma once
 
-#include "core/core.h"
 #include "core/system.h"
+#include "core/core.h"
 
 using namespace dagger;
 
 namespace brawler {
 
-
 class PhysicsSystem : public System
 {
 public:
-	String SystemName() override {
-		return "Physics System";
-	}
+    static float s_Gravity;
+    static float s_RunSpeed;
+    static float s_JumpSpeed;
+    static float s_TerminalVelocity;
+    static float s_DragSpeed;
+    static float s_AirMobility;
 
-	void Run() override;
+    String SystemName() override {
+        return "Physics System";
+    }
+
+    void Run() override;
 
 };
 

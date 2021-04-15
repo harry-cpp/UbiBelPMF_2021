@@ -8,6 +8,7 @@
 #include "core/graphics/animation.h"
 #include "gameplay/brawler/brawler_character_controller.h"
 #include "gameplay/brawler/components/movable.h"
+#include "gameplay/brawler/systems/physics.h"
 
 using namespace dagger;
 using namespace brawler;
@@ -26,15 +27,29 @@ void BrawlerCharacterFSM::Idle::Run(BrawlerCharacterFSM::StateComponent& state_)
 {
 	auto&& [sprite, input, player, transform, movable] = Engine::Registry().get<Sprite, InputReceiver, Player, Transform, Movable>(state_.entity);
 
-	if (!movable.isOnGround || EPSILON_NOT_ZERO(input.Get("jump")))
+	if (!movable.isOnGround)
 	{
-		Logger::info(movable.isOnGround);
-		Logger::info(input.Get("jump"));
 		GoTo(ECharacterStates::Jumping, state_);
+		return;
 	}
-	else if (EPSILON_NOT_ZERO(input.Get("run")))
+
+	if (movable.isOnGround && EPSILON_NOT_ZERO(input.Get("jump"))) {
+		movable.speed.y += PhysicsSystem::s_JumpSpeed;
+		GoTo(ECharacterStates::Jumping, state_);
+		return;
+	}
+
+	if (EPSILON_NOT_ZERO(input.Get("run")))
 	{
 		GoTo(ECharacterStates::Running, state_);
+		return;
+	}
+
+	// Push the player, just for testing drag
+	if (EPSILON_NOT_ZERO(input.Get("light")))
+	{
+		movable.speed.x += sprite.scale.x * 100.0f;
+		movable.speed.y += 200.0f;
 	}
 }
 
@@ -54,35 +69,31 @@ void BrawlerCharacterFSM::Running::Run(BrawlerCharacterFSM::StateComponent& stat
 
 	Float32 run = input.Get("run");
 
-	if (input.Get("run") > 0.5)
+	if (!movable.isOnGround)
 	{
-		movable.envSpeed = { 1000, 0 };
-	}
-	if (input.Get("run") < -0.5)
-	{
-		movable.envSpeed = { -1000, 0 };
-	}
-		
-
-	if (!movable.isOnGround || EPSILON_NOT_ZERO(input.Get("jump")))
-	{
-		Logger::info(movable.isOnGround);
-		Logger::info(input.Get("jump"));
 		GoTo(ECharacterStates::Jumping, state_);
+		return;
 	}
-	else if (EPSILON_ZERO(run))
+
+	if (movable.isOnGround && EPSILON_NOT_ZERO(input.Get("jump")))
+	{
+		movable.speed.y += PhysicsSystem::s_JumpSpeed;
+		GoTo(ECharacterStates::Jumping, state_);
+		return;
+	}
+
+	if (EPSILON_ZERO(run))
 	{
 		GoTo(ECharacterStates::Idle, state_);
-	}
-
-	if (!EPSILON_ZERO(run))
+		return;
+	} 
+	else
 	{
 		sprite.scale.x = run;
-		sprite.position.x += player.speed * sprite.scale.x * Engine::DeltaTime();
-		movable.speed.x += run * player.speed;
+		transform.position.x += run * PhysicsSystem::s_RunSpeed * Engine::DeltaTime();
 	}
-	Logger::info(run);
-	Logger::info(sprite.position.x);
+
+	// TODO decrease x speed when running in opposite direction
 }
 
 // Jumping
@@ -97,7 +108,6 @@ DEFAULT_EXIT(BrawlerCharacterFSM, Jumping);
 
 void BrawlerCharacterFSM::Jumping::Run(BrawlerCharacterFSM::StateComponent& state_)
 {
-
 	auto&& [sprite, input, player, transform, movable] = Engine::Registry().get<Sprite, InputReceiver, Player, Transform, Movable>(state_.entity);
 
 	Float32 run = input.Get("run");
@@ -112,31 +122,20 @@ void BrawlerCharacterFSM::Jumping::Run(BrawlerCharacterFSM::StateComponent& stat
 		{
 			GoTo(ECharacterStates::Running, state_);
 		}
+		return;
 	}
 
-	//if (EPSILON_ZERO(run))
-	//{
-	//	GoTo(ECharacterStates::Idle, state_);
-	//}
-	//else
-	//{
-		// Logger::info(sprite.position.x);
-		// Logger::info(sprite.position.y);
-		//sprite.scale.x = run;
-		//sprite.position.x += player.speed * sprite.scale.x * Engine::DeltaTime();
-		// sprite.position.y += 50 * Engine::DeltaTime();
-		if(EPSILON_NOT_ZERO(input.Get("jump")))
-		{
-			movable.speed.y += 100;
-		}
-		if (EPSILON_NOT_ZERO(run))
-		{
-			sprite.scale.x = run;
-			movable.speed.x += run * player.speed;
-		}
-		// Logger::info(sprite.position.x);
-		// Logger::info(sprite.position.y);
-		//GoTo(ECharacterStates::Idle, state_);
-	//}
+ 	auto jump = input.Get("jump");
 
+	if(EPSILON_NOT_ZERO(jump))
+	{
+		// Jump longer by holding jump button
+		movable.speed.y = movable.speed.y < PhysicsSystem::s_JumpSpeed/2 ? movable.speed.y : PhysicsSystem::s_JumpSpeed/2;
+	}
+		
+	if (EPSILON_NOT_ZERO(run))
+	{
+		sprite.scale.x = run;
+		transform.position.x += run * PhysicsSystem::s_AirMobility * PhysicsSystem::s_RunSpeed * Engine::DeltaTime();
+	}
 }
