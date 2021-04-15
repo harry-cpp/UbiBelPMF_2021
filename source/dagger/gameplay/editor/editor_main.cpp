@@ -54,6 +54,8 @@ ECommonSaveArchetype EditorTestGame::Save(Entity entity_, JSON::json& saveTo_)
         archetype = archetype | ECommonSaveArchetype::Physics;
     }
 
+    // todo: add new if-block here and don't forget to change archetype
+
     return archetype;
 }
 
@@ -72,6 +74,8 @@ void EditorTestGame::Load(ECommonSaveArchetype archetype_, Entity entity_, JSON:
 
     if (IS_ARCHETYPE_SET(archetype_, ECommonSaveArchetype::Physics))
         DeserializeComponent<SimpleCollision>(loadFrom_["simple_collision"], registry.emplace<SimpleCollision>(entity_));
+
+    // todo: add new if-block here and don't forget to change archetype
 }
 
 void EditorTestGame::GameplaySystemsSetup()
