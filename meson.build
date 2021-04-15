@@ -53,6 +53,7 @@ sources = [
     'source/dagger/gameplay/brawler/brawler_character_controller.cpp',
     'source/dagger/gameplay/brawler/brawler_character_fsm.cpp',
     'source/dagger/gameplay/brawler/brawler_main.cpp',
+    'source/dagger/gameplay/brawler/brawler_debug_gui.cpp',
     'source/dagger/gameplay/ping_pong/ping_pong_main.cpp',
     'source/dagger/gameplay/ping_pong/pingpong_ball.cpp',
     'source/dagger/gameplay/ping_pong/pingpong_playerinput.cpp',

@@ -20,16 +20,18 @@
 #include "gameplay/brawler/brawler_character.h"
 #include "gameplay/brawler/brawler_character_controller.h"
 #include "gameplay/brawler/systems/physics.h"
+#include "gameplay/brawler/brawler_debug_gui.h"
 
 using namespace dagger;
 using namespace brawler;
 
 void Brawler::GameplaySystemsSetup(Engine& engine_)
 {
-    engine_.AddSystem<BrawlerControllerSystem>();
-    engine_.AddSystem<PhysicsSystem>();
+    engine_.AddPausableSystem<BrawlerControllerSystem>();
+    engine_.AddPausableSystem<PhysicsSystem>();
     //engine_.AddSystem<ParallaxSystem>();
     //engine_.AddSystem<CameraFollowSystem>();
+    engine_.AddSystem<DebugGui>();
 }
 
 void Brawler::SetCamera()
@@ -38,7 +40,7 @@ void Brawler::SetCamera()
     camera->mode = ECameraMode::FixedResolution;
     camera->size = { 800, 600 };
     camera->zoom = 2;
-    camera->position = { 0, 0, 0 };
+    camera->position = { 0, 100, 0 };
     camera->Update();
 }
 
@@ -98,7 +100,6 @@ void Brawler::CreateBackdrop()
 
 void Brawler::WorldSetup(Engine& engine_)
 {
-
     SetCamera();
     // CreateBackdrop();
 
