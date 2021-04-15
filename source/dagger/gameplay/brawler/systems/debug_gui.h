@@ -15,7 +15,7 @@ class DebugGui
     , public Publisher<ToolMenuRender>
 {
     public:
-        inline String SystemName() { return "Brawler Tools System"; }
+        inline String SystemName() { return "Brawler Debug System"; }
 
         void SpinUp() override;
         void Run() override;

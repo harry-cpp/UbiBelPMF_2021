@@ -1,4 +1,4 @@
-#include "brawler_character_controller.h"
+#include "character_controller.h"
 
 #include "core/core.h"
 #include "core/engine.h"
@@ -10,7 +10,7 @@
 
 using namespace brawler;
 
-void BrawlerControllerSystem::Run()
+void CharacterControllerSystem::Run()
 {
     Engine::Registry().view<BrawlerCharacterFSM::StateComponent>()
         .each([&](BrawlerCharacterFSM::StateComponent& state_)

@@ -18,16 +18,16 @@
 #include "tools/diagnostics.h"
 
 #include "gameplay/brawler/brawler_character.h"
-#include "gameplay/brawler/brawler_character_controller.h"
+#include "gameplay/brawler/systems/character_controller.h"
+#include "gameplay/brawler/systems/debug_gui.h"
 #include "gameplay/brawler/systems/physics.h"
-#include "gameplay/brawler/brawler_debug_gui.h"
 
 using namespace dagger;
 using namespace brawler;
 
 void Brawler::GameplaySystemsSetup(Engine& engine_)
 {
-    engine_.AddPausableSystem<BrawlerControllerSystem>();
+    engine_.AddPausableSystem<CharacterControllerSystem>();
     engine_.AddPausableSystem<PhysicsSystem>();
     //engine_.AddSystem<ParallaxSystem>();
     //engine_.AddSystem<CameraFollowSystem>();

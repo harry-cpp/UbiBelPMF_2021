@@ -9,8 +9,8 @@
 #include "core/game/transforms.h"
 
 #include "gameplay/brawler/brawler_character_fsm.h"
-#include "gameplay/brawler/brawler_character_controller.h"
 #include "gameplay/brawler/components/movable.h"
+#include "gameplay/brawler/components/player.h"
 
 using namespace dagger;
 
@@ -64,7 +64,6 @@ namespace brawler
             if (input_ != "")
                 chr.input.contexts.push_back(input_);
 
-            chr.character.speed = 50;
             return chr;
         }
     };

@@ -6,8 +6,8 @@
 #include "core/game/transforms.h"
 #include "core/graphics/sprite.h"
 #include "core/graphics/animation.h"
-#include "gameplay/brawler/brawler_character_controller.h"
 #include "gameplay/brawler/components/movable.h"
+#include "gameplay/brawler/components/player.h"
 #include "gameplay/brawler/systems/physics.h"
 
 using namespace dagger;

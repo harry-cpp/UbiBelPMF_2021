@@ -8,12 +8,7 @@ using namespace dagger;
 
 namespace brawler
 {
-	struct Player
-	{
-		int speed{ 1 };
-	};
-
-	class BrawlerControllerSystem
+	class CharacterControllerSystem
 		: public System
 	{
 		BrawlerCharacterFSM characterFSM;

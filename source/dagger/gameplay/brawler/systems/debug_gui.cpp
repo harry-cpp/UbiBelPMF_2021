@@ -1,4 +1,4 @@
-#include "brawler_debug_gui.h"
+#include "debug_gui.h"
 
 #include "core/engine.h"
 #include "core/game/transforms.h"
