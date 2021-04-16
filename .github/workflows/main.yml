@@ -24,7 +24,9 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+        with:
+          submodules: recursive
+
       - name: Install dependent packages
         run: sudo apt install meson git python3 python3-pip python3-setuptools python3-wheel ninja-build libglfw3-dev cmake libfmt-dev libtbb-dev clang
 
